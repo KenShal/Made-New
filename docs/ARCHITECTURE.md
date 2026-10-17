@@ -62,3 +62,4 @@ draft ──submit──▶ submitted ──start review──▶ under_review �
 - Vite + React 18 + TypeScript (strict), Tailwind, Framer Motion, Recharts (lazy-loaded with the creator and admin areas only).
 - `src/data/platform.ts` is the single client for the API, with an HTTP implementation and a demo implementation. `server/test/contract.test.ts` checks that every client call has a server route.
 - Motion respects `prefers-reduced-motion` and a site-level toggle. The hero carousel pauses on hover, focus and hidden tabs. It never autoplays under reduced motion.
+- The landing page uses CSS 3D transforms through Framer Motion (no WebGL): a layered 3D hero stage with pointer and scroll tilt, a collection ring that turns as you scroll, scroll-linked manifesto lines and a scroll progress bar. Under reduced motion these become static layouts (the ring becomes a grid).

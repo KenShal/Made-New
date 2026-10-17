@@ -1,4 +1,5 @@
-import { motion } from 'framer-motion';
+import { useRef } from 'react';
+import { motion, useScroll, useTransform, type MotionValue } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import type { Campaign, Creator, Product } from '@shared/types';
 import { formatMoney, money } from '@shared/money';
@@ -8,6 +9,7 @@ import { Garment } from '@/components/Garment';
 import { Arrow, ButtonLink, Container, Eyebrow, Progress, SampleBadge } from '@/components/ui';
 import { ease, imageReveal, revealChild, revealParent } from '@/lib/motion';
 import { COLOURS } from '@/data/sample';
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 
 const inView = { initial: 'hidden', whileInView: 'shown', viewport: { once: true, margin: '0px 0px -12% 0px' } } as const;
 
@@ -187,6 +189,12 @@ export function CreatorInvite() {
   );
 }
 
+/* Steps flip in like cards being turned over. */
+const flipCard = {
+  hidden: { opacity: 0, rotateY: -80, z: -120 },
+  shown: { opacity: 1, rotateY: 0, z: 0, transition: { duration: 0.9, ease: ease.editorial } },
+};
+
 const STEPS = [
   { n: '01', title: 'Create your design.', body: 'Upload print-ready artwork or set type in the studio. Preview it on real garments.', path: 'M10 50 L30 14 L50 50 M18 36 h24' },
   { n: '02', title: 'Get it approved.', body: 'Our team checks print quality, rights and content policy, and tells you exactly what to change.', path: 'M10 32 L24 46 L52 16' },
@@ -205,9 +213,9 @@ export function HowItWorks({ compact = false }: { compact?: boolean }) {
             </h2>
           </>
         )}
-        <motion.ol {...inView} variants={revealParent} className="mt-14 grid gap-px bg-line md:grid-cols-3">
+        <motion.ol {...inView} variants={revealParent} className="mt-14 grid gap-px bg-line md:grid-cols-3" style={{ perspective: 1200 }}>
           {STEPS.map((s) => (
-            <motion.li key={s.n} variants={revealChild} className="flex flex-col gap-6 bg-white p-8 sm:p-10">
+            <motion.li key={s.n} variants={flipCard} whileHover={{ rotateY: -6, rotateX: 4, z: 30 }} className="flex flex-col gap-6 bg-white p-8 sm:p-10">
               <svg viewBox="0 0 60 60" className="h-12 w-12" aria-hidden>
                 <motion.path d={s.path} fill="none" stroke="#B5122B" strokeWidth="2.5" strokeLinecap="square" initial={{ pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 1, ease: ease.editorial, delay: 0.2 }} />
               </svg>
@@ -224,6 +232,7 @@ export function HowItWorks({ compact = false }: { compact?: boolean }) {
 
 export function Manifesto() {
   const lines = ['We believe identity is given, not earned.', 'That creativity is an act of worship.', 'That community is built by people who show up.', 'That what we make can carry what we believe.'];
+  const reduced = usePrefersReducedMotion();
   return (
     <section className="bg-soft py-24 sm:py-36" aria-labelledby="manifesto-title">
       <Container className="grid gap-12 lg:grid-cols-[1fr_2fr]">
@@ -233,27 +242,45 @@ export function Manifesto() {
             The MADE NEW manifesto
           </h2>
         </div>
-        <motion.div {...inView} variants={revealParent}>
-          {lines.map((l) => (
-            <motion.p key={l} variants={revealChild} className="font-serif text-[clamp(1.75rem,3.6vw,3.25rem)] leading-[1.1] tracking-tight">
-              {l}
-            </motion.p>
-          ))}
-          <motion.blockquote variants={revealChild} className="mt-14 border-l-2 border-crimson pl-6">
+        <div style={{ perspective: 1000 }}>
+          {lines.map((l) => (reduced ? <p key={l} className={MANIFESTO_LINE}>{l}</p> : <ScrollLine key={l} text={l} />))}
+          <motion.blockquote {...inView} variants={revealChild} className="mt-14 border-l-2 border-crimson pl-6">
             <p className="max-w-xl text-lg leading-relaxed">&ldquo;Therefore, if anyone is in Christ, the new creation has come: the old has gone, the new is here!&rdquo;</p>
             <footer className="mt-3 text-xs font-bold uppercase tracking-[0.16em] text-ink-muted">2 Corinthians 5:17 (NIV)</footer>
           </motion.blockquote>
-        </motion.div>
+        </div>
       </Container>
     </section>
   );
 }
 
-export function FinalCta() {
+const MANIFESTO_LINE = 'font-serif text-[clamp(1.75rem,3.6vw,3.25rem)] leading-[1.1] tracking-tight';
+
+/* Each line stands up out of the page as it scrolls into place. */
+function ScrollLine({ text }: { text: string }) {
+  const ref = useRef<HTMLParagraphElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start 90%', 'start 50%'] });
+  const opacity = useTransform(scrollYProgress, [0, 1], [0.15, 1]);
+  const rotateX = useTransform(scrollYProgress, [0, 1], [55, 0]);
+  const y = useTransform(scrollYProgress, [0, 1], [40, 0]);
   return (
-    <section className="bg-white py-28 sm:py-40" aria-labelledby="final-title">
+    <motion.p ref={ref} style={{ opacity, rotateX, y, transformOrigin: '50% 100%' }} className={MANIFESTO_LINE}>
+      {text}
+    </motion.p>
+  );
+}
+
+export function FinalCta() {
+  const reduced = usePrefersReducedMotion();
+  const ref = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'center center'] });
+  const scale = useTransform(scrollYProgress, [0, 1], [0.82, 1]);
+  const rotateX = useTransform(scrollYProgress, [0, 1], [35, 0]);
+  const opacity = useTransform(scrollYProgress, [0, 0.6], [0.2, 1]);
+  return (
+    <section ref={ref} className="bg-white py-28 sm:py-40" aria-labelledby="final-title" style={{ perspective: 1200 }}>
       <Container className="flex flex-col items-start gap-10">
-        <motion.h2 initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.9, ease: ease.editorial }} id="final-title" className="font-display text-mega font-extrabold uppercase">
+        <motion.h2 style={reduced ? undefined : { scale, rotateX, opacity, transformOrigin: '0% 100%' }} id="final-title" className="font-display text-mega font-extrabold uppercase">
           Make something
           <br />
           that <span className="text-crimson">matters.</span>
@@ -269,4 +296,16 @@ export function FinalCta() {
       </Container>
     </section>
   );
+}
+
+/* Thin crimson bar along the top of the page showing scroll position. Decorative. */
+export function ScrollProgress() {
+  const reduced = usePrefersReducedMotion();
+  const { scrollYProgress } = useScroll();
+  if (reduced) return null;
+  return <ProgressBar progress={scrollYProgress} />;
+}
+
+function ProgressBar({ progress }: { progress: MotionValue<number> }) {
+  return <motion.div aria-hidden className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-[3px] origin-left bg-crimson" style={{ scaleX: progress }} />;
 }

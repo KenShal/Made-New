@@ -7,7 +7,7 @@ import { Arrow, ButtonLink, Container, Price, SampleBadge } from '@/components/u
 import { useCarousel } from '@/hooks/useCarousel';
 import { usePageVisible } from '@/hooks/usePageVisible';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
-import { captionVariants, ease, garmentVariants, spring } from '@/lib/motion';
+import { captionVariants, ease, garmentVariants, garmentVariantsFlat, spring } from '@/lib/motion';
 import { introDelaySeconds } from './Intro';
 
 const SWIPE_DISTANCE = 60;
@@ -51,6 +51,19 @@ export function Hero({ products, creators }: { products: Product[]; creators: Cr
   const settleScale = useTransform(scrollYProgress, [0, 1], [1, reduced ? 1 : 0.92]);
   const lineScale = useTransform(scrollYProgress, [0.2, 0.9], [0, 1]);
 
+  // 3D stage: pointer tilt plus a turn as the hero scrolls away.
+  const tiltY = useTransform(sx, (v) => v * 1.5);
+  const tiltX = useTransform(sy, (v) => v * -1.6);
+  const turnY = useTransform(scrollYProgress, [0, 1], [0, reduced ? 0 : -32]);
+  const turnX = useTransform(scrollYProgress, [0, 1], [0, reduced ? 0 : 22]);
+  const rotateY = useTransform([tiltY, turnY] as const, ([a, b]: number[]) => a! + b!);
+  const rotateX = useTransform([tiltX, turnX] as const, ([a, b]: number[]) => a! + b!);
+  const chipY = useTransform(scrollYProgress, [0, 1], [0, reduced ? 0 : -140]);
+  const wordX = useTransform(scrollYProgress, [0, 1], ['0%', reduced ? '0%' : '-18%']);
+  const shadowScale = useTransform(sy, [-6, 6], [0.92, 1.08]);
+  const headlineY = useTransform(scrollYProgress, [0, 1], [0, reduced ? 0 : -60]);
+  const headlineRotate = useTransform(scrollYProgress, [0, 1], [0, reduced ? 0 : 12]);
+
   const onDragEnd = (_: unknown, info: PanInfo) => {
     setDragging(false);
     if (info.offset.x < -SWIPE_DISTANCE || info.velocity.x < -SWIPE_VELOCITY) c.next();
@@ -72,7 +85,7 @@ export function Hero({ products, creators }: { products: Product[]; creators: Cr
   return (
     <section ref={ref} className="relative overflow-hidden bg-white" aria-labelledby="hero-title">
       <Container className="relative grid min-h-[calc(100svh-4.5rem)] grid-cols-1 items-center gap-6 pb-14 pt-8 lg:grid-cols-[1.05fr_1fr] lg:gap-4 lg:pb-20">
-        <div className="relative z-10">
+        <motion.div className="relative z-10" style={{ y: headlineY, rotateX: headlineRotate, transformPerspective: 1200, originY: 1 }}>
           <motion.p {...enter(0)} className="mb-6 flex items-center gap-3 font-display text-[0.7rem] font-bold uppercase tracking-editorial text-ink-muted">
             <span className="h-[2px] w-8 bg-crimson" aria-hidden />A new kind of Christian streetwear.
           </motion.p>
@@ -93,7 +106,7 @@ export function Hero({ products, creators }: { products: Product[]; creators: Cr
               Create Your Design
             </ButtonLink>
           </motion.div>
-        </div>
+        </motion.div>
 
         {/* Carousel */}
         <motion.div
@@ -116,35 +129,59 @@ export function Hero({ products, creators }: { products: Product[]; creators: Cr
           }}
           onKeyDown={onKeyDown}
         >
-          <motion.div style={{ y: settleY, scale: settleScale }} className="relative mx-auto aspect-[5/6] w-full max-w-[34rem] lg:max-h-[68vh] lg:max-w-none">
-            {/* Layered depth: soft plate behind the garment */}
-            <motion.div style={{ x: plateX, y: plateY }} className="absolute inset-[8%_6%_6%_10%] bg-soft" aria-hidden />
-            <span className="absolute left-[10%] top-[8%] h-16 w-[3px] bg-crimson" aria-hidden />
-            <motion.div style={{ x: sx, y: sy }} className="absolute inset-0">
-              <AnimatePresence initial={false} custom={c.direction} mode="popLayout">
-                <motion.div
-                  key={product.id}
-                  custom={c.direction}
-                  variants={garmentVariants}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  drag={reduced ? false : 'x'}
-                  dragConstraints={{ left: 0, right: 0 }}
-                  dragElastic={0.18}
-                  onDragStart={() => setDragging(true)}
-                  onDragEnd={onDragEnd}
-                  className="absolute inset-0 cursor-grab touch-pan-y active:cursor-grabbing"
-                  role="group"
-                  aria-roledescription="slide"
-                  aria-label={`${c.index + 1} of ${products.length}: ${product.name}`}
-                >
-                  <Garment colour={colour} artwork={product.artwork} category={product.category} title={`${product.name} T-shirt in ${colour.name}`} className="pointer-events-none h-full w-full select-none p-[6%]" />
+          {/* 3D stage. Layers sit at different depths so pointer tilt and scroll turn read as real space. */}
+          <div className="relative mx-auto aspect-[5/6] w-full max-w-[34rem] lg:max-h-[68vh] lg:max-w-none" style={{ perspective: 1400 }}>
+            <motion.div style={{ y: settleY, scale: settleScale, rotateX, rotateY, transformStyle: 'preserve-3d' }} className="absolute inset-0 will-change-transform">
+              {/* Giant outlined wordmark far behind the garment */}
+              <motion.span
+                style={{ z: -220, x: wordX }}
+                className="pointer-events-none absolute -left-[30%] top-[16%] select-none whitespace-nowrap font-display text-[clamp(6rem,16vw,15rem)] font-extrabold uppercase leading-none text-transparent [-webkit-text-stroke:1.5px_rgba(181,18,43,0.16)]"
+                aria-hidden
+              >
+                Made new
+              </motion.span>
+              <motion.div style={{ x: plateX, y: plateY, z: -90 }} className="absolute inset-[8%_6%_6%_10%] bg-soft" aria-hidden />
+              <motion.span style={{ z: 60 }} className="absolute left-[10%] top-[8%] h-16 w-[3px] bg-crimson" aria-hidden />
+              {/* Soft contact shadow on the plate */}
+              <motion.span style={{ z: -40, scaleX: shadowScale }} className="absolute bottom-[7%] left-1/2 h-[6%] w-[58%] -translate-x-1/2 rounded-[50%] bg-ink/15 blur-xl" aria-hidden />
+              <motion.div style={{ x: sx, y: sy, z: 40, transformStyle: 'preserve-3d' }} className="absolute inset-0">
+                <AnimatePresence initial={false} custom={c.direction} mode="popLayout">
+                  <motion.div
+                    key={product.id}
+                    custom={c.direction}
+                    variants={reduced ? garmentVariantsFlat : garmentVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    drag={reduced ? false : 'x'}
+                    dragConstraints={{ left: 0, right: 0 }}
+                    dragElastic={0.18}
+                    onDragStart={() => setDragging(true)}
+                    onDragEnd={onDragEnd}
+                    className="absolute inset-0 cursor-grab touch-pan-y active:cursor-grabbing"
+                    role="group"
+                    aria-roledescription="slide"
+                    aria-label={`${c.index + 1} of ${products.length}: ${product.name}`}
+                  >
+                    <Garment colour={colour} artwork={product.artwork} category={product.category} title={`${product.name} T-shirt in ${colour.name}`} className="pointer-events-none h-full w-full select-none p-[6%]" />
+                  </motion.div>
+                </AnimatePresence>
+              </motion.div>
+              {/* Floating verse chip, closest to the viewer */}
+              {product.scripture && (
+                <motion.div style={{ z: 150, y: chipY }} className="absolute bottom-[14%] right-[2%] sm:right-[-2%]" aria-hidden>
+                  <motion.span
+                    animate={reduced ? undefined : { y: [0, -8, 0] }}
+                    transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+                    className="block bg-crimson px-3 py-2 font-display text-[0.65rem] font-bold uppercase tracking-[0.18em] text-white shadow-[0_18px_40px_-12px_rgba(120,13,32,0.55)]"
+                  >
+                    {product.scripture}
+                  </motion.span>
                 </motion.div>
-              </AnimatePresence>
+              )}
             </motion.div>
             {product.sample && <SampleBadge className="absolute right-2 top-2" />}
-          </motion.div>
+          </div>
 
           {/* Product caption + controls. Fixed heights prevent layout shift between slides. */}
           <div className="relative mt-2 flex items-end justify-between gap-4 sm:mt-4">

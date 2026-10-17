@@ -33,9 +33,10 @@ export const revealParent: Variants = {
   hidden: {},
   shown: { transition: { staggerChildren: 0.06, delayChildren: 0.04 } },
 };
+/* Reveals tip up from below in 3D, like a card standing up. */
 export const revealChild: Variants = {
-  hidden: { opacity: 0, y: 18 },
-  shown: { opacity: 1, y: 0, transition: { duration: duration.reveal, ease: ease.editorial } },
+  hidden: { opacity: 0, y: 28, rotateX: -32, transformPerspective: 900 },
+  shown: { opacity: 1, y: 0, rotateX: 0, transformPerspective: 900, transition: { duration: duration.reveal + 0.1, ease: ease.editorial } },
 };
 
 /* Image reveal: a clip that opens upward. */
@@ -44,11 +45,17 @@ export const imageReveal: Variants = {
   shown: { clipPath: 'inset(0% 0% 0% 0%)', scale: 1, transition: { duration: duration.slow, ease: ease.editorial } },
 };
 
-/* Hero product carousel: direction-aware garment movement. */
+/* Hero product carousel: the garment turns in 3D as it changes. */
 export const garmentVariants: Variants = {
-  enter: (dir: number) => ({ x: dir > 0 ? 90 : -90, opacity: 0, scale: 0.94, rotate: dir > 0 ? 2.5 : -2.5 }),
-  center: { x: 0, opacity: 1, scale: 1, rotate: 0, transition: { ...spring.garment, opacity: { duration: duration.base } } },
-  exit: (dir: number) => ({ x: dir > 0 ? -70 : 70, opacity: 0, scale: 0.98, transition: { duration: duration.base, ease: ease.exit } }),
+  enter: (dir: number) => ({ x: dir > 0 ? 140 : -140, rotateY: dir > 0 ? 75 : -75, opacity: 0, scale: 0.9 }),
+  center: { x: 0, rotateY: 0, opacity: 1, scale: 1, transition: { ...spring.garment, opacity: { duration: duration.base } } },
+  exit: (dir: number) => ({ x: dir > 0 ? -120 : 120, rotateY: dir > 0 ? -70 : 70, opacity: 0, scale: 0.94, transition: { duration: duration.base + 0.08, ease: ease.exit } }),
+};
+/* Reduced motion: a plain crossfade. */
+export const garmentVariantsFlat: Variants = {
+  enter: { opacity: 0 },
+  center: { opacity: 1, transition: { duration: duration.base } },
+  exit: { opacity: 0, transition: { duration: duration.quick } },
 };
 export const captionVariants: Variants = {
   enter: { opacity: 0, y: 14 },

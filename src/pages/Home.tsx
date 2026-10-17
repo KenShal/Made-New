@@ -3,7 +3,8 @@ import { useCatalogData } from '@/data/useCatalog';
 import { HERO_PRODUCT_SLUGS } from '@/data/sample';
 import { Hero } from '@/features/home/Hero';
 import { Intro } from '@/features/home/Intro';
-import { CreatorInvite, FeaturedCampaigns, FeaturedCollection, FinalCta, HowItWorks, Manifesto, Mission } from '@/features/home/Sections';
+import { CreatorInvite, FeaturedCampaigns, FeaturedCollection, FinalCta, HowItWorks, Manifesto, Mission, ScrollProgress } from '@/features/home/Sections';
+import { CollectionRing } from '@/features/home/Ring';
 import { Container, ErrorState, Skeleton } from '@/components/ui';
 
 export default function Home() {
@@ -28,7 +29,9 @@ export default function Home() {
       )}
       {data.status === 'ready' && (
         <>
+          <ScrollProgress />
           <Hero products={pickHero(data.data.products)} creators={data.data.creators} />
+          <CollectionRing products={data.data.products} creators={data.data.creators} />
           <FeaturedCollection products={data.data.products} creators={data.data.creators} campaigns={data.data.campaigns} />
           <Mission />
           <FeaturedCampaigns campaigns={data.data.campaigns} creators={data.data.creators} products={data.data.products} />
