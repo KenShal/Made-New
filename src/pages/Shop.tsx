@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Page } from '@/components/Page';
 import { ProductCard } from '@/components/ProductCard';
@@ -73,7 +73,7 @@ export default function Shop() {
     return (
       <Page title="Collection not found">
         <Container className="py-24">
-          <EmptyState title="We couldn't find that collection." action={<a href="/shop" className="underline">Browse all products</a>} />
+          <EmptyState title="We couldn't find that collection." action={<Link to="/shop" className="underline">Browse all products</Link>} />
         </Container>
       </Page>
     );
