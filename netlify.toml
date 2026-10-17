@@ -1,0 +1,8 @@
+# Netlify build settings. Static headers live in public/_headers and the
+# single-page-app fallback in public/_redirects.
+[build]
+  command = "npm run build && npm run check:bundle-secrets"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"

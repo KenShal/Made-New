@@ -77,7 +77,7 @@ npm run build
 npm run check:bundle-secrets
 ```
 
-Deploy `dist/`. Send all routes to `index.html` (SPA fallback). `public/_headers` sets a CSP and security headers on Netlify and Cloudflare Pages. Edit its `connect-src` to include your API origin. On other hosts, configure the same headers yourself.
+Deploy `dist/`. All routes must fall back to `index.html` (SPA fallback). `netlify.toml` plus `public/_redirects` configure Netlify, and `vercel.json` configures Vercel, so importing the repo on either host works with no extra settings. `public/_headers` sets a CSP and security headers on Netlify and Cloudflare Pages. Edit its `connect-src` to include your API origin. On other hosts, configure the same headers yourself.
 
 ## Environment variables
 
