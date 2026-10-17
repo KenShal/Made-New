@@ -76,3 +76,18 @@ html[data-reduce-motion='true'] *::after {
 .bg-crimson-blush .text-ink-muted {
   color: #666462;
 }
+
+/* Landing page: sections lock into place when a scroll comes to rest near one.
+   "proximity" only snaps when close, so long sections still scroll freely and
+   nothing is ever unreachable. Set by <SnapScroll /> on the home page only. */
+html.snap-page {
+  scroll-snap-type: y proximity;
+  scroll-padding-top: 0;
+}
+html.snap-page main section[aria-labelledby] {
+  scroll-snap-align: start;
+}
+html.snap-page .snap-stop {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}

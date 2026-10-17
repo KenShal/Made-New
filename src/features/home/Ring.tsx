@@ -56,6 +56,10 @@ function Ring({ items, creators }: { items: Product[]; creators: Creator[] }) {
 
   return (
     <section ref={ref} className="relative bg-crimson-deep text-white" style={{ height: `${Math.max(240, n * 45)}vh` }} aria-labelledby="ring-title">
+      {/* One snap point per shirt, so the ring locks with a garment facing the viewer. */}
+      {items.map((p, i) => (
+        <div key={p.id} aria-hidden className="snap-stop pointer-events-none absolute inset-x-0 h-px" style={{ top: `calc(${i / (n - 1)} * (100% - 100vh))` }} />
+      ))}
       <div className="sticky top-0 flex h-screen flex-col overflow-hidden">
         <Container className="relative z-10 pt-20 sm:pt-24">
           <motion.div style={{ y: titleY, opacity: titleOpacity }}>

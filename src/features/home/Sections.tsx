@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform, type MotionValue } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import type { Campaign, Creator, Product } from '@shared/types';
@@ -308,4 +308,14 @@ export function ScrollProgress() {
 
 function ProgressBar({ progress }: { progress: MotionValue<number> }) {
   return <motion.div aria-hidden className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-[3px] origin-left bg-crimson" style={{ scaleX: progress }} />;
+}
+
+/* Turns on section snapping for the page it's mounted on (the landing page). */
+export function SnapScroll() {
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.add('snap-page');
+    return () => root.classList.remove('snap-page');
+  }, []);
+  return null;
 }
