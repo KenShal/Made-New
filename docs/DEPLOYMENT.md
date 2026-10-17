@@ -77,7 +77,9 @@ npm run build
 npm run check:bundle-secrets
 ```
 
-Deploy `dist/`. All routes must fall back to `index.html` (SPA fallback). `netlify.toml` plus `public/_redirects` configure Netlify, and `vercel.json` configures Vercel, so importing the repo on either host works with no extra settings. `public/_headers` sets a CSP and security headers on Netlify and Cloudflare Pages. Edit its `connect-src` to include your API origin. On other hosts, configure the same headers yourself.
+Deploy `dist/`. All routes must fall back to `index.html` (SPA fallback). `netlify.toml` plus `public/_redirects` configure Netlify, and `vercel.json` configures Vercel, so importing the repo on either host works with no extra settings.
+
+**GitHub Pages (demo only).** `.github/workflows/pages.yml` builds the demo-mode site with hash URLs (`/#/shop`, since Pages has no fallback to `index.html`) and pushes it to the `gh-pages` branch on every push to `main`. Turn it on once under Settings, Pages: "Deploy from a branch", branch `gh-pages`, folder `/ (root)`. Pages ignores `_headers`, so it has no CSP. Use Netlify, Vercel or Cloudflare Pages for the real site. `public/_headers` sets a CSP and security headers on Netlify and Cloudflare Pages. Edit its `connect-src` to include your API origin. On other hosts, configure the same headers yourself.
 
 ## Environment variables
 

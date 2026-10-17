@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, MemoryRouter, Route, Routes, useLocation, Link } from 'react-router-dom';
+import { BrowserRouter, HashRouter, MemoryRouter, Route, Routes, useLocation, Link } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -93,7 +93,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
 }
 
 // Embedded previews (e.g. a hosted demo frame) can't rely on the page URL, so they route in memory.
-const Router = import.meta.env.VITE_PUBLIC_ROUTER === 'memory' ? MemoryRouter : BrowserRouter;
+// Static hosts without a fallback to index.html (GitHub Pages) use hash URLs; embedded demos use memory.
+const ROUTERS = { memory: MemoryRouter, hash: HashRouter } as const;
+const Router = ROUTERS[import.meta.env.VITE_PUBLIC_ROUTER as keyof typeof ROUTERS] ?? BrowserRouter;
 
 export default function App() {
   return (
