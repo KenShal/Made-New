@@ -1,0 +1,4 @@
+-- Local development seed. Creates no privileged users by default.
+-- To make yourself an admin locally after signing up:
+--   select public.grant_role('<your-user-uuid>', 'admin', null);
+-- Run with the service role (supabase db reset applies this file as postgres).
